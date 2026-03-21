@@ -1172,6 +1172,281 @@ AuthService génère token JWT
         ↓
 Token envoyé à React ✅
 
+----------------------------------------------------------------------------AuthService-------------------------------------------------------------------------
+1)C'est quoi AuthService ?
+C'est la logique métier du login et register :
+	Login :
+1. Vérifier email + password
+2. Générer token JWT
+3. Retourner AuthResponse
+
+Register :
+1. Vérifier email pas déjà utilisé
+2. Hasher le password
+3. Créer le user dans PostgreSQL
+4. Générer token JWT
+5. Retourner AuthResponse
+
+
+
+2)package ma.enset.ask_enset.service;
+
+import lombok.RequiredArgsConstructor;
+import ma.enset.ask_enset.dto.AuthResponse;
+import ma.enset.ask_enset.dto.LoginRequest;
+import ma.enset.ask_enset.dto.RegisterRequest;
+import ma.enset.ask_enset.model.User;
+import ma.enset.ask_enset.repository.UserRepository;
+import ma.enset.ask_enset.security.JwtService;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service#Cette classe contient la logique métier → crée-la automatiquement au démarrage ✅
+@RequiredArgsConstructor
+public class AuthService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
+
+    // Login
+    public AuthResponse login(LoginRequest request) {#Reçoit LoginRequest (email + password) → retourne AuthResponse (token + infos)
+
+        // 1. Vérifier email + password
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(#UsernamePasswordAuthenticationToken= objet qui contient email + password
+                        request.getEmail(),
+                        request.getPassword()
+                )#Si corrects  → continue ✅
+		Si incorrects → BadCredentialsException ❌
+               → 401 Unauthorized à React
+        );
+
+        // 2. Charger le user depuis PostgreSQL
+        User user = userRepository
+                .findByEmail(request.getEmail())
+                .orElseThrow();#Pas trouvé  → orElseThrow() lance erreur ❌
+
+        // 3. Générer token JWT
+        String token = jwtService.generateToken(user.getEmail());
+
+        // 4. Retourner la réponse
+        return new AuthResponse(
+                token,
+                user.getNom(),
+                user.getPrenom(),
+                user.getEmail(),
+                user.getRole().name(),
+                user.getImagePath()
+        );
+    }
+
+    // Register
+    public AuthResponse register(RegisterRequest request) {
+
+        // 1. Vérifier si email déjà utilisé
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email déjà utilisé !");#email déjà utilisé
+        → throw RuntimeException ❌
+        → erreur envoyée à React
+        }
+
+        // 2. Créer le user
+        User user = new User();
+        user.setNom(request.getNom());
+        user.setPrenom(request.getPrenom());
+        user.setEmail(request.getEmail());
+        user.setPassword(
+                passwordEncoder.encode(request.getPassword())
+        );
+        user.setRole(User.Role.ETUDIANT);
+
+        // 3. Sauvegarder dans PostgreSQL
+        userRepository.save(user);#INSERT INTO users (nom, prenom, email, password, role, image_path)
+        // 4. Générer token JWT
+        String token = jwtService.generateToken(user.getEmail());
+
+        // 5. Retourner la réponse
+        return new AuthResponse(
+                token,
+                user.getNom(),
+                user.getPrenom(),
+                user.getEmail(),
+                user.getRole().name(),
+                user.getImagePath()
+        );
+    }
+}
+
+-------------------------------------------------------------------------------AuthController----------------------------------------------------------------------
+
+1)C'est quoi son rôle ?
+AuthController = porte d'entrée des requêtes React
+
+React → POST /auth/login    → AuthController → AuthService
+React → POST /auth/register → AuthController → AuthService
+
+2)package ma.enset.ask_enset.controller;
+
+import lombok.RequiredArgsConstructor;
+import ma.enset.ask_enset.dto.AuthResponse;
+import ma.enset.ask_enset.dto.LoginRequest;
+import ma.enset.ask_enset.dto.RegisterRequest;
+import ma.enset.ask_enset.service.AuthService;
+import org.springframework.http.ResponseEntity;#`ResponseEntity` = enveloppe de la réponse HTTP :
+import org.springframework.web.bind.annotation.*;#Importe toutes les annotations REST :
+
+@RestController #Cette classe gère les requêtes HTTP et retourne du JSON automatiquement
+@RequestMapping("/auth")#Définit le **préfixe** de toutes les routes :
+@RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")#Autorise React à appeler notre API :CORS = Cross-Origin Resource Sharing :Le navigateur bloque par sécurité
+public class AuthController {
+
+    private final AuthService authService;#Pour utiliser les méthodes login() et register() d'AuthService
+
+    @PostMapping("/login")#Cette méthode répond aux requêtes **POST** sur `/auth/login` :GET  /auth/login → 405 Method Not Allowed ❌
+    public ResponseEntity<AuthResponse> login(#ResponseEntity<AuthResponse> → retourne une réponse HTTP avec AuthResponse dedans
+            @RequestBody LoginRequest request) {#@RequestBody convertit automatiquement :JSON → LoginRequest ✅
+        return ResponseEntity.ok(authService.login(request));#Appelle AuthService.login()Code   : 200 OK->Corps  : AuthResponse (converti en JSON)
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(
+            @RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(authService.register(request));
+    }
+}
+-----------------------------------------------------------------Backend Login/Register est terminé !---------------------------------------------------------------
+
+1)
+✅ User.java              → modèle + UserDetails
+✅ UserRepository.java    → accès PostgreSQL
+✅ DTOs                   → LoginRequest, RegisterRequest, AuthResponse
+✅ JwtService.java        → générer/vérifier tokens
+✅ JwtAuthFilter.java     → filtre JWT
+✅ SecurityConfig.java    → configuration sécurité
+✅ AuthService.java       → logique login/register
+✅ AuthController.java    → API REST
+
+2)Flux complet maintenant:
+LOGIN :
+React → POST /auth/login {email, password}
+        ↓
+AuthController reçoit
+        ↓
+AuthService vérifie credentials
+        ↓
+Token JWT généré
+        ↓
+React reçoit token + infos ✅
+
+REGISTER :
+React → POST /auth/register {nom, prenom, email, password}
+        ↓
+AuthController reçoit
+        ↓
+AuthService crée user dans PostgreSQL
+        ↓
+Token JWT généré
+        ↓
+React reçoit token + infos ✅
+
+------------------------------------------------------Test avec Postman ou Swagger----------------------------------------------------------------------------------
+
+1) C'est quoi Postman ?
+
+	C'est un outil externe qui permet d'envoyer des requêtes HTTP à ton API.
+
+	Sans React encore ✅
+	Tu peux tester ton API directement :
+
+	Postman envoie :
+	POST /auth/login
+	{
+	    "email": "y.alami@enset.ma",
+	    "password": "1234"
+	}
+        ↓
+	Spring Boot répond :
+	{
+	    "token": "eyJhbGci...",
+	    "nom": "Alami"
+	}
+
+2)C'est quoi Swagger ?
+	
+	C'est une interface graphique générée automatiquement par Spring Boot qui documente et teste ton API.
+
+		Tu ouvres :
+			http://localhost:8080/swagger-ui.html
+			        ↓
+			Tu vois toutes tes routes :
+			POST /auth/login
+			POST /auth/register
+			        ↓
+			Tu cliques sur une route
+   			        ↓
+			Tu remplis les données
+ 			        ↓
+			Tu envoies et vois la réponse ✅
+
+
+3)On commence par Swagger !
+
+	a.Étape 1 — Ajoute Swagger dans pom.xml:Ouvre pom.xml et ajoute dans <dependencies> :Ouvre pom.xml et ajoute dans <dependencies> :
+
+	b.Étape 2 — Autorise Swagger dans SecurityConfig:Ouvre SecurityConfig.java et modifie .authorizeHttpRequests() :
+		
+		.authorizeHttpRequests(auth -> auth
+    .requestMatchers("/auth/**").permitAll()
+    .requestMatchers(
+        "/swagger-ui/**",tous les fichiers de l'interface Swagger
+        "/swagger-ui.html",page d'accueil de Swagger
+        "/v3/api-docs/**" #documentation JSON de ton API
+    ).permitAll()  // ← ajoute ça ✅
+    .anyRequest().authenticated()
+)
+	c.Étape 3 — Lance Spring Boot:
+
+		cd backend/ask_enset
+		.\mvnw spring-boot:run
+		http://localhost:8080/swagger-ui.html
+
+	d.Étape 5 — Teste Register d'abord
+
+		1.Clique sur POST /auth/register
+
+		2.Clique "Try it out"
+
+		3.Remplis :
+
+		4.Clique "Execute"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
