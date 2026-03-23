@@ -1426,6 +1426,37 @@ React reçoit token + infos ✅
 		4.Clique "Execute"
 
 
+3)maintenant avec Postman:
+
+	a. Étape 1 — Télécharge Postman
+		👉 https://www.postman.com/downloads/
+
+	b.Étape 2 — Crée une nouvelle requête
+		Clique sur "New" → "HTTP Request"
+
+	c.Étape 2 — Configure la requête Register
+
+		POST    http://localhost:8080/auth/register
+
+		Headers
+			Clique sur "Headers" et ajoute :
+			Key   : Content-Type
+			Value : application/json
+
+		Body
+
+			Clique sur "Body"
+			Sélectionne "raw"
+			Sélectionne "JSON" (à droite)
+		Copie :
+			{
+   			 "nom": "Benali",
+   		 "prenom": "Mohammed",
+    		"email": "m.benali@enset.ma",
+    		"password": "1234"
+		}
+
+
 
 
 

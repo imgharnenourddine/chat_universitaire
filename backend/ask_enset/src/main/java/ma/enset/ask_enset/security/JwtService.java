@@ -1,6 +1,7 @@
 package ma.enset.ask_enset.security;
 
-
+import io.jsonwebtoken.io.Decoders;
+import java.util.Base64;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -24,7 +25,9 @@ public class JwtService {
         return Jwts.builder()
                 .subject(email)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .expiration(new Date(
+                        System.currentTimeMillis() + expiration
+                ))
                 .signWith(getKey())
                 .compact();
     }
@@ -55,6 +58,9 @@ public class JwtService {
     }
 
     private Key getKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+        byte[] keyBytes = Decoders.BASE64.decode(
+                Base64.getEncoder().encodeToString(secret.getBytes())
+        );
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 }
