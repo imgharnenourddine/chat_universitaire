@@ -10,4 +10,5 @@ public interface MessageRepository
         extends JpaRepository<Message, Long> {
 
     List<Message> findByConversationId(Long conversationId);
+    int countByConversationId(Long conversationId);
 }

@@ -38,19 +38,17 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
-
-                        // ✅ AJOUT 2 : Laisse passer /error sans token
-                        // Quand une erreur se produit, Spring redirige vers /error
-                        // Sans ça, on reçoit un 403 au lieu du vrai message d'erreur
-                        .requestMatchers("/error").permitAll()
-
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**"
                         ).permitAll()
-                        .requestMatchers("/api/documents/**").hasRole("ETUDIANT")
-                        .requestMatchers("/api/chat/**").authenticated()
+                        .requestMatchers("/api/documents/**")
+                        .hasRole("ADMIN")
+                        .requestMatchers("/api/chat/**")
+                        .authenticated()
+                        .requestMatchers("/api/profile/**")
+                        .authenticated() // ← ajoute ça ✅
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
