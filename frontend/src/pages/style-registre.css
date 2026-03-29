@@ -1,0 +1,235 @@
+/* --- Variables & Setup --- */
+:root {
+    --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e0e7ff 100%);
+    --card-bg: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-glow: rgba(37, 99, 235, 0.15);
+    --input-bg: #f8fafc;
+    --input-border: #e2e8f0;
+    --shadow-soft: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+    --transition: all 0.2s ease-in-out;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+#root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: var(--bg-gradient);
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg-gradient);
+    color: var(--text-main);
+    min-height: 100vh;
+   
+    width: 100%;
+    padding: 1rem;
+}
+
+a { text-decoration: none; }
+
+/* --- Wrapper Principal --- */
+.auth-wrapper {
+    width: 100%;
+    max-width: 440px; /* Largeur contenue pour un effet SaaS propre */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+/* --- Bouton Retour --- */
+.btn-back {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    color: var(--text-muted);
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--input-bg);
+    transition: var(--transition);
+}
+
+.btn-back:hover {
+    color: var(--primary);
+    background: #e0e7ff;
+    transform: translateX(-3px); /* Petit effet de glissement vers la gauche */
+}
+/* --- En-tête Logos --- */
+.brand-header {
+    padding-top: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.logo-img {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+}
+.enset-img {
+    height: 70px;
+    width: auto;
+    object-fit: contain;
+}
+
+.logo-divider {
+    width: 2px;
+    height: 24px;
+    background-color: #cbd5e1;
+    border-radius: 2px;
+}
+
+/* --- Carte du Formulaire --- */
+.form-card {
+    position: relative;  /* ← ajoute ça */
+    width: 100%;
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.form-header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text-main);
+}
+
+/* --- Champs du Formulaire --- */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.input-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--text-main);
+    transition: var(--transition);
+}
+
+.input-group input::placeholder {
+    color: #94a3b8;
+}
+
+/* Focus : Fond blanc + Bordure bleue + Glow */
+.input-group input:focus {
+    outline: none;
+    background: #ffffff;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-glow);
+}
+
+/* --- Bouton Principal --- */
+.btn-submit {
+    margin-top: 0.5rem;
+    width: 100%;
+    background: var(--primary);
+    color: #ffffff;
+    border: none;
+    padding: 0.9rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-submit:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
+}
+
+/* --- Footer (Lien de connexion) --- */
+.form-footer {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.link-login {
+    color: var(--primary);
+    font-weight: 600;
+    margin-left: 4px;
+    transition: var(--transition);
+}
+
+.link-login:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+/* Message d'erreur sous les champs */
+.field-error {
+  font-size: 0.78rem;
+  color: #ef4444;
+  margin-top: 2px;
+}
+
+/* Erreur venant de Spring Boot */
+.api-error {
+  background: #fee2e2;
+  color: #dc2626;
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* --- Responsive (Mobile) --- */
+@media (max-width: 480px) {
+    .form-card {
+        padding: 2rem 1.5rem;
+    }
+    
+    .input-row {
+        grid-template-columns: 1fr; /* Sur très petit écran, nom et prénom s'empilent */
+        gap: 1.25rem;
+    }
+}
