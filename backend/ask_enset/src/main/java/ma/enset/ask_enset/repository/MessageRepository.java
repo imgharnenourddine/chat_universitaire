@@ -6,9 +6,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface MessageRepository
-        extends JpaRepository<Message, Long> {
+public interface MessageRepository extends JpaRepository<Message, Long> {
 
+    // ✅ ancienne méthode — gardée pour ProfileService
     List<Message> findByConversationId(Long conversationId);
-    int countByConversationId(Long conversationId);
+
+    // ✅ nouvelle méthode — ordonnée par date
+    List<Message> findByConversationIdOrderByCreatedAtAsc(Long conversationId);
 }

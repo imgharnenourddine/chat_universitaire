@@ -38,7 +38,7 @@ public class User implements UserDetails {
     private Role role;
 
     @Column(name = "image_path")
-    private String imagePath = "profiles/default.jpg";
+    private String imagePath = null;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

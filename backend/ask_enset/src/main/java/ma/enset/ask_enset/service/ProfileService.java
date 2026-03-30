@@ -1,5 +1,7 @@
 package ma.enset.ask_enset.service;
-
+import io.minio.GetObjectArgs;
+import java.io.InputStream;
+import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -119,4 +122,14 @@ public class ProfileService {
                 .orElseThrow(() ->
                         new RuntimeException("Utilisateur non trouvé"));
     }
+    // Récupère la photo depuis MinIO et la retourne comme bytes
+public byte[] getPhoto(String fileName) throws Exception {
+    InputStream stream = minioClient.getObject(
+        GetObjectArgs.builder()
+            .bucket(bucketName)
+            .object(fileName)
+            .build()
+    );
+    return stream.readAllBytes();
+}
 }

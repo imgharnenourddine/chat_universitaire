@@ -43,6 +43,7 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**"
                         ).permitAll()
+                        .requestMatchers("/api/profile/photo/**").permitAll()
                         .requestMatchers("/api/documents/**")
                         .hasRole("ADMIN")
                         .requestMatchers("/api/chat/**")

@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "messages")
 @Getter
@@ -20,6 +22,7 @@ public class Message {
 
     @ManyToOne
     @JoinColumn(name = "conversation_id", nullable = false)
+    @JsonIgnoreProperties({"messages", "user"})
     private Conversation conversation;
 
     @Column(nullable = false, columnDefinition = "TEXT")

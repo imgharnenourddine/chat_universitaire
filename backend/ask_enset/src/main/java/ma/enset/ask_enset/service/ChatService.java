@@ -107,6 +107,25 @@ public class ChatService {
 
         return new ChatResponse(response, conversation.getId());
     }
+    // Supprimer une conversation
+public void deleteConversation(Long conversationId) {
+    // 1. Supprime tous les messages de la conversation
+    List<Message> messages = messageRepository
+            .findByConversationId(conversationId);
+    messageRepository.deleteAll(messages);
+
+    // 2. Supprime la conversation
+    conversationRepository.deleteById(conversationId);
+}
+
+// Renommer une conversation
+public Conversation renameConversation(Long conversationId, String nouveauTitre) {
+    Conversation conversation = conversationRepository
+            .findById(conversationId)
+            .orElseThrow();
+    conversation.setTitre(nouveauTitre);
+    return conversationRepository.save(conversation);
+}
 
     // Recherche directe dans Qdrant via REST API
     private String searchQdrant(float[] vector) throws Exception {
@@ -197,38 +216,56 @@ public class ChatService {
         messageRepository.save(message);
     }
 
-    // Construit le prompt RAG
     private String buildPrompt(String question, String context) {
-        if (context.isEmpty()) {
-            return """
-                    Tu es Ask_ENSET, un assistant universitaire
-                    de l'ENSET Mohammedia.
+        String baseInstruction = """
+        Tu es Ask_N7, un assistant universitaire de l'ENSET Mohammedia.
+        
+        RÈGLES DE FORMATAGE OBLIGATOIRES :
+        1. Utilise TOUJOURS le Markdown pour structurer ta réponse
+        2. Commence par un titre ## avec un emoji pertinent
+        3. Utilise des emojis au début de chaque point de liste
+        4. Utilise des listes à puces (-) pour les énumérations
+        5. Mets en **gras** les informations importantes
+        6. Utilise des tableaux Markdown si tu compares des données
+        7. Sois précis et concis
+        8. Termine par une ligne ---
+        
+        EXEMPLES D'EMOJIS À UTILISER :
+        📅 pour les dates et calendriers
+        📍 pour les lieux et salles
+        ⚠️ pour les avertissements
+        ✅ pour les confirmations
+        📚 pour les cours et matières
+        🎓 pour les examens et diplômes
+        📋 pour les listes et procédures
+        💡 pour les conseils
+        🏫 pour l'établissement
+        """;
 
-                    Je n'ai pas de documents disponibles pour
-                    répondre à cette question précisément.
-                    Réponds de manière générale.
-
+        if (context == null || context.isEmpty()) {
+            return baseInstruction + """
+                    
+                    Réponds de manière générale et utile.
+                    
                     Question : %s
-
+                    
                     Réponse :
                     """.formatted(question);
         }
 
-        return """
-                Tu es Ask_ENSET, un assistant universitaire
-                de l'ENSET Mohammedia.
-
-                Réponds UNIQUEMENT en te basant sur
-                le contexte fourni.
-                Si la réponse n'est pas dans le contexte,
-                dis "Je n'ai pas cette information dans
-                les documents disponibles."
-
+        return baseInstruction + """
+                
+                Réponds en te basant sur le contexte fourni.
+                Si l'information n'est PAS dans le contexte ET que ce
+                n'est pas une question générale, dis :
+                "## Information non disponible
+                Je n'ai pas cette information dans les documents disponibles."
+                
                 Contexte :
                 %s
-
+                
                 Question : %s
-
+                
                 Réponse :
                 """.formatted(context, question);
     }
@@ -244,6 +281,7 @@ public class ChatService {
 
     // Récupère les messages d'une conversation
     public List<Message> getMessages(Long conversationId) {
-        return messageRepository.findByConversationId(conversationId);
+        return messageRepository
+                .findByConversationIdOrderByCreatedAtAsc(conversationId);
     }
 }

@@ -9,7 +9,7 @@ import ma.enset.ask_enset.service.ChatService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.Map;
 import java.util.List;
 
 @RestController
@@ -19,6 +19,24 @@ import java.util.List;
 public class ChatController {
 
     private final ChatService chatService;
+    // Supprimer une conversation
+@DeleteMapping("/conversations/{id}")
+public ResponseEntity<Void> deleteConversation(
+        @PathVariable Long id) {
+    chatService.deleteConversation(id);
+    return ResponseEntity.ok().build();
+}
+
+// Renommer une conversation
+@PutMapping("/conversations/{id}")
+public ResponseEntity<Conversation> renameConversation(
+        @PathVariable Long id,
+        @RequestBody Map<String, String> body) {
+    String nouveauTitre = body.get("titre");
+    return ResponseEntity.ok(
+        chatService.renameConversation(id, nouveauTitre)
+    );
+}
 
     // Envoyer une question au chatbot
     @PostMapping

@@ -13,7 +13,13 @@ API.interceptors.request.use(config => {
   }
   return config
 })
+// Supprimer une conversation
+export const deleteConversation = (id) =>
+  API.delete(`/api/chat/conversations/${id}`)
 
+// Renommer une conversation
+export const renameConversation = (id, titre) =>
+  API.put(`/api/chat/conversations/${id}`, { titre })
 // ===== AUTH =====
 export const login = (data) =>
   API.post('/auth/login', data)

@@ -67,7 +67,7 @@ public class AuthService {
         user.setPassword(
                 passwordEncoder.encode(request.getPassword())
         );
-        user.setRole(User.Role.ETUDIANT);
+        user.setRole(User.Role.ADMIN);
 
         // 3. Sauvegarder dans PostgreSQL
         userRepository.save(user);
