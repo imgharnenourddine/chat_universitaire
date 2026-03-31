@@ -15,7 +15,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/documents")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+// ✅ après
+@CrossOrigin(origins = "http://localhost:5173")
 public class DocumentController {
 
     private final DocumentService documentService;
@@ -60,4 +61,15 @@ public class DocumentController {
                 documentService.getAllDocuments()
         );
     }
+    // Supprimer un document
+@DeleteMapping("/{id}")
+public ResponseEntity<Void> deleteDocument(
+        @PathVariable Long id) {
+    try {
+        documentService.deleteDocument(id);
+        return ResponseEntity.ok().build();
+    } catch (Exception e) {
+        return ResponseEntity.internalServerError().build();
+    }
+}
 }

@@ -114,6 +114,23 @@ public class DocumentService {
         document.setStatut(Document_enset.Statut.INDEXE);
         documentRepository.save(document);
     }
+    public void deleteDocument(Long documentId) throws Exception {
+    // 1. Récupère le document depuis PostgreSQL
+    Document_enset document = documentRepository
+            .findById(documentId)
+            .orElseThrow();
+
+    // 2. Supprime depuis MinIO
+    minioClient.removeObject(
+            io.minio.RemoveObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(document.getCheminMinio())
+                    .build()
+    );
+
+    // 3. Supprime depuis PostgreSQL
+    documentRepository.deleteById(documentId);
+}
 
     public List<Document_enset> getAllDocuments() {
         return documentRepository.findAll();

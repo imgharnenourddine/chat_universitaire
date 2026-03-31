@@ -4,6 +4,7 @@ package ma.enset.ask_enset.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "documents")
@@ -34,9 +35,13 @@ public class Document_enset {
     @Column(nullable = false)
     private Statut statut = Statut.EN_ATTENTE;
 
+
+    
     @ManyToOne
     @JoinColumn(name = "uploaded_by", nullable = false)
+    @JsonIgnoreProperties({"password", "authorities", "accountNonExpired", "accountNonLocked", "credentialsNonExpired", "enabled"})
     private User uploadedBy;
+
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

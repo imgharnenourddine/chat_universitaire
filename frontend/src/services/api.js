@@ -60,4 +60,8 @@ export const uploadDocument = (formData) =>
 export const getDocuments = () =>
   API.get('/api/documents')
 
+
+export const deleteDocument = (id) =>
+  API.delete(`/api/documents/${id}`)
+
 export default API

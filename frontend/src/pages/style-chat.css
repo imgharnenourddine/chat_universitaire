@@ -572,7 +572,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
     font-weight: 600;
 }
 .btn-admin {
-    width: 100%;
+    width: 170px;
     display: flex;
     align-items: center;
     gap: 10px;
